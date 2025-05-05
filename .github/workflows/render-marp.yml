@@ -9,6 +9,19 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - name: Restore or Save Cache - Font Noto
+        id: cache-font-noto
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/fonts/opentype/noto
+          key: font-noto-cache-key
+
+      - name: Install fonts-noto
+        run: |
+          sudo apt update
+          sudo apt install fonts-noto-cjk
+        if: ${{ steps.cache-font-noto.outputs.cache-hit != 'true' }}
+
       - uses: actions/checkout@v3
 
       - name: Convert Markdown into PDF
@@ -17,9 +30,17 @@ jobs:
           config-file: ./.marp/.marprc-ci.yml
           generate-html: true
           generate-pdf: true
+      # typst setup
+      - uses: typst-community/setup-typst@v4
+      - name: Convert Typst into PDF
+        run: |
+          mkdir -p ./output
+          for file in ./slides/*.typ; do
+            typst compile "$file" "./output/$(basename "${file%.*}").pdf"
+          done
 
       - name: Save outputs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: output
           path: ./output
