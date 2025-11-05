@@ -22,6 +22,7 @@ for dir in $(ls -l | grep '^d' | awk '{print $9}'); do
         if [[ -f "$dir/slide.typ" ]]; then
             # slide.typが存在する場合の処理
             cat "$dir/slide.typ" >"slides/$dir.typ"
+            cat "$dir/references.bib" >"slides/$dir.bib"
             # indexに追記
             echo "- $dir ([PDF](./$dir.pdf))" >>'slides/index.md'
         elif [[ -f "$dir/slide.md" ]]; then
